@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
 from app.models import *
+from .image import upload_file
 bp = Blueprint('form', __name__, url_prefix='/form')
 
 
@@ -18,26 +19,27 @@ def form_list():
                 reslist.append(
                     {"formIdx": form.formIdx, "imageUrl": None})
         return jsonify(reslist)
+
     elif request.method == "POST":
+        li = upload_file()
         form = Form()
         db.session.add(form)
-        ppt = Presentation(form=form)
+        ppt = Presentation(formIdx=form.formIdx)
         db.session.add(ppt)
         # "imgUrls" : ["http~~","http~~","http~~"],
-        imgUrls = request.json.get('imgUrls')
 
         # 파싱 ->
-        for pgNum, imgUrl in enumerate(imgUrls):
+        for pgNum, imgUrl in enumerate(li):
             if not imgUrl:
                 errMsg = 'Validation Error'
                 return jsonify({'status': 'error', 'message': errMsg}), 422
             else:
-                image = Image(presentation=ppt, pgNum=pgNum+1,
+                image = Image(pptIdx=ppt.pptIdx, pgNum=pgNum+1,
                               imgUrl=imgUrl, script=None, topic=None)
                 db.session.add(image)
                 db.session.commit()
 
-        return jsonify({'status': 'success', 'message': 'Image saved successfully'}), 200
+        return jsonify(li)
 
 
 @bp.route('/<int:Idx>', methods=['GET'])
@@ -100,7 +102,7 @@ def form_script(Idx, pgNum):
             form = Form()
             db.session.add(form)
             scriptonly = Scriptonly(
-                form=form, script=request.json[0]['script'])
+                formIdx=form.formIdx, script=request.json[0]['script'])
             db.session.add(scriptonly)
             db.session.commit()
             fIdx = form.formIdx

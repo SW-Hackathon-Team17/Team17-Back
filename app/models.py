@@ -13,8 +13,6 @@ class Presentation(db.Model):
     pptIdx = db.Column(db.Integer, primary_key=True)
     formIdx = db.Column(db.Integer, db.ForeignKey(
         'form.formIdx', ondelete='CASCADE'))
-    form = db.relationship(
-        'Form', backref=db.backref('presentation_set'), cascade='all, delete-orphan', single_parent=True)
     image = db.relationship(
         'Image', backref=db.backref('presentation_set'))
 
@@ -23,8 +21,6 @@ class Scriptonly(db.Model):
     scriptOnlyIdx = db.Column(db.Integer, primary_key=True)
     formIdx = db.Column(db.Integer, db.ForeignKey(
         'form.formIdx', ondelete='CASCADE'))
-    form = db.relationship(
-        'Form', backref=db.backref('scriptonly_set'), cascade='all, delete-orphan', single_parent=True)
     keyword = db.relationship(
         'Keyword', backref=db.backref('scriptonly_set'))
     script = db.Column(db.Text, nullable=False)
@@ -34,8 +30,6 @@ class Image(db.Model):
     imgIdx = db.Column(db.Integer, primary_key=True)
     pptIdx = db.Column(db.Integer, db.ForeignKey(
         'presentation.pptIdx', ondelete='CASCADE'))
-    presentation = db.relationship(
-        'Presentation', backref=db.backref('image_set'), cascade='all, delete-orphan', single_parent=True)
     keyword = db.relationship(
         'Keyword', backref=db.backref('image_set'))
     pgNum = db.Column(db.Integer, nullable=False)

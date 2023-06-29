@@ -9,6 +9,7 @@ import config
 db = SQLAlchemy()
 migrate = Migrate()
 
+
 def create_app():
     app = Flask(__name__)
     app.config.from_object(config)
@@ -23,7 +24,11 @@ def create_app():
 
     # blueprint
     from . import form
+    from . import ai
+    from . import image
 
     app.register_blueprint(form.bp)
+    app.register_blueprint(ai.bp)
+    app.register_blueprint(image.bp)
 
     return app
