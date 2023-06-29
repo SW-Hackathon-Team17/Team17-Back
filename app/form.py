@@ -97,8 +97,28 @@ def form_script(Idx, pgNum):
 
 @bp.route('/<int:Idx>/<int:pgNum>/keyword', methods=['GET', 'POST', 'PUT'])
 def form_keyword(Idx, pgNum):
+    
+    if request.method == "GET":
+        form = Form.query.filter(Form.formIdx == Idx).first()
+        keylist = []
+        if form.presentation:
+            ppt = form.presentation[0]
+            image = ppt.image[pgNum-1]
+            for i in image.keyword:
+                keylist.append({
+                    "key":i.keyword, "level":i.level
+                })
+            return jsonify(keylist)
+        else:
+            scriptonly = form.scriptonly
+            for i in scriptonly.keyword:
+                keylist.append({
+                    "key":scriptonly.keyword, "level":scriptonly.level
+                })
+            return jsonify(keylist)
+            
 
-    if request.method == "POST":
+    elif request.method == "POST":
         # key를 저장해야할 form을 idx로 가져옴
         form = Form.query.filter(Form.formIdx == Idx).first()
         if form.presentation:
@@ -116,7 +136,35 @@ def form_keyword(Idx, pgNum):
                     imgIdx=image.imgIdx, keyword=i['keyword'], level=i['level'], topic=None)
                 db.session.add(new_keyword)
             db.session.commit()
-        return jsonify({'status': 'success', 'message': 'Script saved successfully'}), 200
+        return jsonify({'status': 'success', 'message': 'Keyword saved successfully'}), 200
+
+
+    elif request.method == "PUT":
+        form = Form.query.filter(Form.formIdx == Idx).first()
+        if form.presentation:
+            ppt = form.presentation[0]
+            image = ppt.image[pgNum-1]
+            for i in image.keyword:
+                db.session.delete(i)
+            for i in request.json:
+                new_keyword = Keyword(
+                    imgIdx=image.imgIdx, keyword=i['keyword'], level=i['level'], topic=None)
+                db.session.add(new_keyword)
+            db.session.commit()
+            return  jsonify({'status': 'success', 'message': 'Keyword updated successfully'}), 200
+        else:
+            scriptonly = form.scriptonly
+            for i in scriptonly.keyword:
+                db.session.delete(i)
+            for i in request.json:
+                new_keyword = Keyword(
+                    imgIdx=image.imgIdx, keyword=i['keyword'], level=i['level'], topic=None)
+                db.session.add(new_keyword)
+            db.session.commit()
+            
+            return  jsonify({'status': 'success', 'message': 'Keyword updated successfully'}), 200
+        
+
 
 
 @bp.route('/query', methods=['GET', 'POST', 'PUT', 'DELETE'])
