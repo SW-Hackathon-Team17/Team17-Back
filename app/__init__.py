@@ -2,16 +2,19 @@ from flask import Flask
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from datetime import timedelta
+from flask_cors import CORS  # Import CORS here
 
 import config
 
 db = SQLAlchemy()
 migrate = Migrate()
 
-
 def create_app():
     app = Flask(__name__)
     app.config.from_object(config)
+
+    # Apply CORS to the Flask app here
+    CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
 
     # ORM
     db.init_app(app)
@@ -19,8 +22,8 @@ def create_app():
     from . import models
 
     # blueprint
-    from . import form1
+    from . import form
 
-    app.register_blueprint(form1.bp)
+    app.register_blueprint(form.bp)
 
     return app
