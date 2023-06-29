@@ -19,8 +19,8 @@ def create_app():
     from . import models
 
     # blueprint
-    from . import main
+    from . import form1
 
-    app.register_blueprint(main.bp)
+    app.register_blueprint(form1.bp)
 
     return app
