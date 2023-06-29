@@ -93,3 +93,36 @@ def form_script(Idx, pgNum):
             db.session.delete(scriptonly)
             db.session.commit()
         return jsonify({'status': 'success', 'message': 'Script deleted successfully'}), 200
+
+
+@bp.route('/<int:Idx>/<int:pgNum>/keyword', methods=['GET', 'POST', 'PUT'])
+def form_keyword(Idx, pgNum):
+
+    if request.method == "POST":
+        # key를 저장해야할 form을 idx로 가져옴
+        form = Form.query.filter(Form.formIdx == Idx).first()
+        if form.presentation:
+            ppt = form.presentation[0]
+            image = ppt.image[pgNum-1]
+            for i in request.json:
+                new_keyword = Keyword(
+                    imgIdx=image.imgIdx, keyword=i['keyword'], level=i['level'], topic=None)
+                db.session.add(new_keyword)
+            db.session.commit()
+        else:  # scriptOnly인 경우
+            image = form.scriptonly[0]
+            for i in request.json:
+                new_keyword = Keyword(
+                    imgIdx=image.imgIdx, keyword=i['keyword'], level=i['level'], topic=None)
+                db.session.add(new_keyword)
+            db.session.commit()
+        return jsonify({'status': 'success', 'message': 'Script saved successfully'}), 200
+
+
+@bp.route('/query', methods=['GET', 'POST', 'PUT', 'DELETE'])
+def query():
+    form = Form.query.filter(Form.formIdx == 3).first()
+    keyword = Scriptonly(form=form, script="fsfsf")
+    db.session.add(keyword)
+    db.session.commit()
+    return "clear"

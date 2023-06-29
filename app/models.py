@@ -4,9 +4,9 @@ from app import db
 class Form(db.Model):
     formIdx = db.Column(db.Integer, primary_key=True)
     presentation = db.relationship(
-        'Presentation', backref=db.backref('form_set'), cascade='all, delete-orphan', single_parent=True)
+        'Presentation', backref=db.backref('form_set'))
     scriptonly = db.relationship(
-        'Scriptonly', backref=db.backref('form_set'), cascade='all, delete-orphan', single_parent=True)
+        'Scriptonly', backref=db.backref('form_set'))
 
 
 class Presentation(db.Model):
@@ -16,7 +16,7 @@ class Presentation(db.Model):
     form = db.relationship(
         'Form', backref=db.backref('presentation_set'), cascade='all, delete-orphan', single_parent=True)
     image = db.relationship(
-        'Image', backref=db.backref('presentation_set'), cascade='all, delete-orphan')
+        'Image', backref=db.backref('presentation_set'))
 
 
 class Scriptonly(db.Model):
@@ -26,7 +26,7 @@ class Scriptonly(db.Model):
     form = db.relationship(
         'Form', backref=db.backref('scriptonly_set'), cascade='all, delete-orphan', single_parent=True)
     keyword = db.relationship(
-        'Keyword', backref=db.backref('scriptonly_set'), cascade='all, delete-orphan')
+        'Keyword', backref=db.backref('scriptonly_set'))
     script = db.Column(db.Text, nullable=False)
 
 
@@ -37,7 +37,7 @@ class Image(db.Model):
     presentation = db.relationship(
         'Presentation', backref=db.backref('image_set'), cascade='all, delete-orphan', single_parent=True)
     keyword = db.relationship(
-        'Keyword', backref=db.backref('image_set'), cascade='all, delete-orphan')
+        'Keyword', backref=db.backref('image_set'))
     pgNum = db.Column(db.Integer, nullable=False)
     imgUrl = db.Column(db.Text, nullable=False)
     script = db.Column(db.Text)
