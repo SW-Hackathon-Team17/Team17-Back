@@ -21,10 +21,8 @@ def form_list():
     elif request.method == "POST":
         form = Form()
         db.session.add(form)
-        db.session.commit()
         ppt = Presentation(form=form)
         db.session.add(ppt)
-        db.session.commit()
         # "imgUrls" : ["http~~","http~~","http~~"],
         imgUrls = request.json.get('imgUrls')
 
@@ -42,23 +40,56 @@ def form_list():
         return jsonify({'status': 'success', 'message': 'Image saved successfully'}), 200
 
 
-@bp.route('/<int:Idx>/<int:pgNum>/script', methods=['GET,POST,PUT,DELETE'])
+@bp.route('/<int:Idx>/<int:pgNum>/script', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def form_script(Idx, pgNum):
     if request.method == "GET":
         form = Form.query.filter(Form.formIdx == Idx).first()
-        form = form.form_set.first()
-        print(form.__name__)
-        if form.__name__ == 'ppt':
-            form = form.ppt_set[pgNum-1]
-            return jsonify({"script": form.script})
+        if form.presentation:
+            ppt = form.presentation[0]
+            image = ppt.image[pgNum-1]
+            return jsonify({"script": image.script})
         else:
-            return jsonify({"script": form.script})
+            scriptonly = form.scriptonly
+            return jsonify({"script": scriptonly.script})
 
     elif request.method == "POST":
-        form = Form()
-        db.session.add(form)
-        db.session.commit()
-        ppt = Presentation(formIdx=form)
-        db.session.add(ppt)
-        db.session.commit()
-    return jsonify([{}])
+        form = Form.query.filter(Form.formIdx == Idx).first()
+        if form.presentation:
+            ppt = form.presentation[0]
+            image = ppt.image
+            image[pgNum-1].script = request.json['script']
+            db.session.commit()
+        else:
+            scriptonly = form.scriptonly[0]
+            scriptonly.script = request.json['script']
+            db.session.commit()
+        return jsonify({'status': 'success', 'message': 'Script saved successfully'}), 200
+
+    elif request.method == "PUT":
+        form = Form.query.filter(Form.formIdx == Idx).first()
+        if form.presentation:
+            ppt = form.presentation[0]
+            image = ppt.image
+            image[pgNum-1].script = request.json['script']
+            db.session.commit()
+        else:
+            scriptonly = form.scriptonly[0]
+            scriptonly.script = request.json['script']
+            db.session.commit()
+        return jsonify({'status': 'success', 'message': 'Script revised successfully'}), 200
+
+    elif request.method == "DELETE":
+        form = Form.query.filter(Form.formIdx == Idx).first()
+        if form.presentation:
+            ppt = form.presentation[0]
+            image = ppt.image
+            image[pgNum-1].script = None
+            keywordlist = image[pgNum-1].keyword
+            for keyword in keywordlist:
+                db.session.delete(keyword)
+            db.session.commit()
+        else:
+            scriptonly = form.scriptonly[0]
+            db.session.delete(scriptonly)
+            db.session.commit()
+        return jsonify({'status': 'success', 'message': 'Script deleted successfully'}), 200
