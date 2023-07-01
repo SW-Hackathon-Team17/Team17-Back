@@ -16,7 +16,7 @@ translator = googletrans.Translator()
 
 # Minsu's OpenAI Key!!!
 # If you upload this code file at github, Please delete lower line.
-openai.api_key = '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'
+openai.api_key = 'api-key'
 
 start_time = time.time()
 
