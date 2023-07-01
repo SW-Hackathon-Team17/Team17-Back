@@ -24,17 +24,17 @@ def form_list():
         li = upload_file()
         form = Form()
         db.session.add(form)
-        ppt = Presentation(formIdx=form.formIdx)
+        ppt = Presentation(form=form)
         db.session.add(ppt)
         # "imgUrls" : ["http~~","http~~","http~~"],
-
+        db.session.commit()
         # 파싱 ->
         for pgNum, imgUrl in enumerate(li):
             if not imgUrl:
                 errMsg = 'Validation Error'
                 return jsonify({'status': 'error', 'message': errMsg}), 422
             else:
-                image = Image(pptIdx=ppt.pptIdx, pgNum=pgNum+1,
+                image = Image(presentation=ppt, pgNum=pgNum+1,
                               imgUrl=imgUrl, script=None, topic=None)
                 db.session.add(image)
                 db.session.commit()
@@ -46,10 +46,11 @@ def form_list():
 def img_url(Idx):
     list = []
     form = Form.query.filter(Form.formIdx == Idx).first()
-    ppt = form.presentation[0]
-    image = ppt.image
-    for i in image:
-        list.append({"pgNum": i.pgNum, "imgUrl": i.imgUrl})
+    if form.presentation:
+        ppt = form.presentation[0]
+        image = ppt.image
+        for i in image:
+            list.append({"pgNum": i.pgNum, "imgUrl": i.imgUrl})
     return jsonify(list)
 
 
@@ -79,7 +80,7 @@ def form_script(Idx, pgNum):
             scriptonly = form.scriptonly[0]
             for i in scriptonly.keyword:
                 keylist.append({
-                    "key": scriptonly.keyword, "level": scriptonly.level
+                    "key": i.keyword, "level": i.level
                 })
             reslist.append(keylist)
         return jsonify(reslist)
@@ -102,7 +103,7 @@ def form_script(Idx, pgNum):
             form = Form()
             db.session.add(form)
             scriptonly = Scriptonly(
-                formIdx=form.formIdx, script=request.json[0]['script'])
+                form=form, script=request.json[0]['script'])
             db.session.add(scriptonly)
             db.session.commit()
             fIdx = form.formIdx
@@ -119,7 +120,7 @@ def form_script(Idx, pgNum):
                     db.session.delete(i)
             for i in request.json[1]:
                 new_keyword = Keyword(
-                    imgIdx=image.imgIdx, keyword=i['keyword'], level=i['level'], topic=None)
+                    image=image, keyword=i['keyword'], level=i['level'], topic=None)
                 db.session.add(new_keyword)
             db.session.commit()
         else:
@@ -129,7 +130,7 @@ def form_script(Idx, pgNum):
                     db.session.delete(i)
             for i in request.json[1]:
                 new_keyword = Keyword(
-                    scriptOnlyIdx=scriptonly.scriptOnlyIdx, keyword=i['keyword'], level=i['level'], topic=None)
+                    scriptonly=scriptonly, keyword=i['keyword'], level=i['level'], topic=None)
                 db.session.add(new_keyword)
             db.session.commit()
         return jsonify({"formIdx": fIdx})
@@ -156,7 +157,7 @@ def form_script(Idx, pgNum):
                     db.session.delete(i)
             for i in request.json[1]:
                 new_keyword = Keyword(
-                    imgIdx=image.imgIdx, keyword=i['keyword'], level=i['level'], topic=None)
+                    image=image, keyword=i['keyword'], level=i['level'], topic=None)
                 db.session.add(new_keyword)
             db.session.commit()
             return jsonify({'status': 'success', 'message': 'Keyword updated successfully'}), 200
@@ -167,7 +168,7 @@ def form_script(Idx, pgNum):
                     db.session.delete(i)
             for i in request.json[1]:
                 new_keyword = Keyword(
-                    imgIdx=image.imgIdx, keyword=i['keyword'], level=i['level'], topic=None)
+                    image=image, keyword=i['keyword'], level=i['level'], topic=None)
                 db.session.add(new_keyword)
             db.session.commit()
 
